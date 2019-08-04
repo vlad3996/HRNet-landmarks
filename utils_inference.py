@@ -3,7 +3,7 @@ import scipy
 import scipy.misc
 import torch
 import numpy as np
-
+from PIL import Image
 from lib.models import get_face_alignment_net, get_cls_net
 from lib.config import config, config_imagenet, merge_configs
 
@@ -110,7 +110,8 @@ def crop(img, center, scale, output_size=(256,256), rot=0):
             return torch.zeros(output_size[0], output_size[1], img.shape[2]) \
                         if len(img.shape) > 2 else torch.zeros(output_size[0], output_size[1])
         else:
-            img = scipy.misc.imresize(img, [new_ht, new_wd])  # (0-1)-->(0-255)
+            img = np.array(Image.fromarray(img.astype(np.uint8)).resize((new_wd, new_ht)))
+#             img = scipy.misc.imresize(img, [new_ht, new_wd])  # (0-1)-->(0-255)
             center_new[0] = center_new[0] * 1.0 / sf
             center_new[1] = center_new[1] * 1.0 / sf
             scale = scale / sf
@@ -144,7 +145,8 @@ def crop(img, center, scale, output_size=(256,256), rot=0):
         # Remove padding
         new_img = scipy.misc.imrotate(new_img, rot)
         new_img = new_img[pad:-pad, pad:-pad]
-    new_img = scipy.misc.imresize(new_img, output_size)
+    new_img = np.array(Image.fromarray(new_img.astype(np.uint8)).resize(output_size[::-1]))
+#     new_img = scipy.misc.imresize(new_img, output_size)
     return new_img
 
 
